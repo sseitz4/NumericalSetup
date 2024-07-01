@@ -2,7 +2,7 @@
 - `Example.ipynb`: Main execution file (Jupyter Notebook) from which the model is solved and simulated. Also contains plots.
 - `Example.py`: Main Python module. This file defines the model class, initializes parameters (in `par` struct), allocates memory to store the solution in (`sol` struct), and allocates memory to store the simulated paths in (`sim` struct). This builds on the `EconModel` class.
 - `cppfuncs`: Folder containing all c++ files. The main file linking to Python is the `cpp_link_file.cpp`. The `solve.cpp` files contains the solution algorithm and `simulate.cpp` contains the simulation module.
-- `cpp_linkfile.dll`: The executable file, constructed when compiling the c++ code in `Example.ipynb`. This is all done automatically once you have followed the installation guide below.
+- `cpp_link_file.dll`: The executable file, constructed when compiling the c++ code in `Example.ipynb`. This is all done automatically once you have followed the installation guide below.
 
 
 **Installation guide:**
