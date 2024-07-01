@@ -12,6 +12,7 @@ typedef struct par_struct
  int num_psi;
  int num_xi;
  int simN;
+ int seed;
  int num_threads;
  double* grid_m;
  double* grid_psi;
@@ -42,6 +43,7 @@ int get_int_par_struct(par_struct* x, char* name){
  else if( strcmp(name,"num_psi") == 0 ){ return x->num_psi; }
  else if( strcmp(name,"num_xi") == 0 ){ return x->num_xi; }
  else if( strcmp(name,"simN") == 0 ){ return x->simN; }
+ else if( strcmp(name,"seed") == 0 ){ return x->seed; }
  else if( strcmp(name,"num_threads") == 0 ){ return x->num_threads; }
  else if( strcmp(name,"num_shocks") == 0 ){ return x->num_shocks; }
  else {return -9999;}
