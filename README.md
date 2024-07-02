@@ -17,4 +17,4 @@
 7. Clone this repository from GitHub by i) opening the Anaconda Prompt, ii) navigating to the location on disk where you want the files cloned to, iii) write `git clone https://github.com/ThomasHJorgensen/NumericalSetup.git` and hit enter.
 8. In Anaconda Prompt install required Python packages by typing `pip install econmodel consav`
 
-To learn more about how this code uses OpenMP and NLopt to parallelize and solve numerical optimization problems, respectively, see [EconModelNotebooks](https://github.com/NumEconCopenhagen/EconModelNotebooks).
+To learn more about how this code uses OpenMP and NLopt to parallelize and solve numerical optimization problems, respectively, see e.g. [EconModelNotebooks](https://github.com/NumEconCopenhagen/EconModelNotebooks).
