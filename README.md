@@ -1,4 +1,4 @@
-**The code has only been tested on Windows and will likely not work without modifications on iOS.**
+**Note:** The code has only been tested on Windows and will likely not work without modifications on iOS.
 
 **File structure:**
 - `Example.ipynb`: Main execution file (Jupyter Notebook) from which the model is solved and simulated. Also contains plots.
