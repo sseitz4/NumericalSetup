@@ -1,3 +1,5 @@
+**The code has only been tested on Windows and will likely not work without modifications on iOS.**
+
 **File structure:**
 - `Example.ipynb`: Main execution file (Jupyter Notebook) from which the model is solved and simulated. Also contains plots.
 - `Example.py`: Main Python module. This file defines the model class, initializes parameters (in `par` struct), allocates memory to store the solution in (`sol` struct), and allocates memory to store the simulated paths in (`sim` struct). This builds on the `EconModel` class.
