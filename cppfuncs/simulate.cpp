@@ -9,7 +9,6 @@ namespace simulation {
 
     void model(sim_struct *sim, sol_struct *sol, par_struct *par){
     
-        // pre-compute intra-temporal optimalallocation
         #pragma omp parallel num_threads(par->num_threads)
         {
             #pragma omp for
