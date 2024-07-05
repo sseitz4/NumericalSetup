@@ -1,3 +1,5 @@
+**See a short introduction to my numerical setup [here](https://youtu.be/ujMiZSAKlsg)**
+
 **Note:** The code has only been tested on Windows and will likely not work without modifications on iOS.
 
 **File structure:**
