@@ -3,6 +3,7 @@ typedef struct par_struct
  double R;
  double rho;
  double beta;
+ int num_kids;
  int T;
  int num_m;
  double max_m;
@@ -38,7 +39,8 @@ double get_double_par_struct(par_struct* x, char* name){
 
 int get_int_par_struct(par_struct* x, char* name){
 
- if( strcmp(name,"T") == 0 ){ return x->T; }
+ if( strcmp(name,"num_kids") == 0 ){ return x->num_kids; }
+ else if( strcmp(name,"T") == 0 ){ return x->T; }
  else if( strcmp(name,"num_m") == 0 ){ return x->num_m; }
  else if( strcmp(name,"num_psi") == 0 ){ return x->num_psi; }
  else if( strcmp(name,"num_xi") == 0 ){ return x->num_xi; }
