@@ -1,7 +1,7 @@
 // functions related to utility and environment.
 #ifndef MAIN
 #define UTILS
-#include "myheader.cpp"
+#include "myheader.h"
 #endif
 
 namespace utils {
