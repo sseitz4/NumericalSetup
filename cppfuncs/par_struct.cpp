@@ -3,7 +3,7 @@ typedef struct par_struct
  double R;
  double rho;
  double beta;
- int num_kids;
+ int Max_num_kids;
  int T;
  int num_m;
  double max_m;
