@@ -21,6 +21,7 @@ class ModelClass(EconModelClass):
         # Utility: 
         par.rho = 2.0   # CRRA
         par.beta = 0.98 # Discount factor
+        par.num_kids = 3 # Number Children
 
         ###################
         # state variables #
