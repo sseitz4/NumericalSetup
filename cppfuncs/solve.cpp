@@ -67,17 +67,18 @@ namespace solution {
 
 
 
-    void solve_period(int t,sol_struct *sol,par_struct *par){
+    void solve_period(int t, int n_kids,sol_struct *sol,par_struct *par){
         
         if (t == (par->T-1)){
             // terminal period: consume all resources
             for (int iM=0; iM<par->num_m;iM++){
                 int idx = index::d2(t,iM,par->T,par->num_m);
-
-                double m = par->grid_m[iM];
-                sol->c[idx] = m;
-                sol->V[idx] = utils::util(sol->c[idx],par);
                 
+                double m = par->grid_m[iM];
+                for(int iNkids = 0; iNkids <par->Max_num_kids, iNkids++){
+                    sol->c[idx] = m;
+                    sol->V[idx] = utils::util(sol->c[idx],par);
+                }
             }
 
         } else {
