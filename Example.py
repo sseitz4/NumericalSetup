@@ -21,12 +21,13 @@ class ModelClass(EconModelClass):
         # Utility: 
         par.rho = 2.0   # CRRA
         par.beta = 0.98 # Discount factor
-        par.num_kids = 3 # Number Children
+        
 
         ###################
         # state variables #
         par.T = 15
-        
+        par.num_kids = 1 # Number Children
+
         # wealth
         par.num_m = 100
         par.max_m = 20.0
@@ -36,6 +37,8 @@ class ModelClass(EconModelClass):
 
         par.sigma_psi = 0.1 # permanent income shock std
         par.sigma_xi = 0.1 # transitory income shock std
+
+        par.prob_arrival_kids = 0.01 # Probability of having a kid // Test with = 0.0 as you never get any kid...
 
         par.num_psi = 5
         par.num_xi = 5
@@ -70,6 +73,7 @@ class ModelClass(EconModelClass):
         sim.A = np.nan + np.zeros(shape_sim)
         sim.P = np.nan + np.zeros(shape_sim)
         sim.Y = np.nan + np.zeros(shape_sim)
+        sim.Kids = np.zeros(shape_sim, dtype = ('int')) # Gives you a float: np.nan + np.zeros(shape_sim, dtype = ('int')) # NEW
         
         # d. initialization, no assets and permanent income of 1
         sim.a_init = np.zeros(par.simN)
@@ -80,7 +84,10 @@ class ModelClass(EconModelClass):
         sim.xi = np.exp(par.sigma_xi*np.random.normal(size=shape_sim) - 0.5*par.sigma_xi**2)
         sim.psi = np.exp(par.sigma_psi*np.random.normal(size=shape_sim) - 0.5*par.sigma_psi**2)
 
-        
+        # f. initialization, no kids:
+        sim.kids_init = np.zeros(par.simN, dtype =('int'))  # NEW
+        sim.kids_update = np.random.uniform(low=0, high=1, size=shape_sim)
+
     def setup_grids(self):
         par = self.par
         
