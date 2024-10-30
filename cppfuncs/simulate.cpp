@@ -2,7 +2,7 @@
 // functions for solving model for singles.
 #ifndef MAIN
 #define SIMULATE
-#include "myheader.cpp"
+#include "myheader.h"
 #endif
 
 namespace simulation {
