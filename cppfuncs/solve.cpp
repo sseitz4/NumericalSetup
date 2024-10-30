@@ -5,10 +5,10 @@
 
 namespace solution {
 
-    double value_of_choice(double cons,double m, double* V_next, par_struct* par){
+    double value_of_choice(double cons, double labor,double m, double* V_next, par_struct* par){
 
         // flow-utility
-        double Util = utils::util(cons,par);
+        double Util = utils::util(cons, labor,par);
 
         // savings
         double savings = m - cons;
@@ -22,14 +22,18 @@ namespace solution {
             savings = 1.0e-6; // no savings
         }
         
+
         // expected continuation value
         double EV_next = 0.0;
         for (int i_shock=0; i_shock<par->num_shocks; i_shock++){
             
             double fac = par->G*par->grid_psi[i_shock]; // normalization factor
 
-            // interpolate next period value function for this combination of transitory and permanent income shocks
+            // interpolate next period value function for this combination of transitory and permanent income shocks 
             double m_next = par->R*savings/fac + par->grid_xi[i_shock];
+            if (labor == 0){
+                double m_next = m_next * par->UE_benefit;
+            }
             double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,V_next,m_next);
             V_next_interp = pow(fac , (1.0-par->rho)) * V_next_interp; // normalization factor
 
@@ -45,6 +49,7 @@ namespace solution {
     }
 
     typedef struct {
+        double labor;
         double m;             
         double *V_next;               
         par_struct *par;      
@@ -57,11 +62,12 @@ namespace solution {
         // unpack
         solver_struct *solver_data = (solver_struct *) solver_data_in;  
         
+        double labor = solver_data -> labor;
         double cons = x[0];
         double m = solver_data->m;
         par_struct *par = solver_data->par;
 
-        return - value_of_choice(cons,m,solver_data->V_next,par); // negative since we minimize
+        return - value_of_choice(cons,m, labor,solver_data->V_next,par); // negative since we minimize
 
     }
 
@@ -70,14 +76,37 @@ namespace solution {
     void solve_period(int t,sol_struct *sol,par_struct *par){
         
         if (t == (par->T-1)){
+            
             // terminal period: consume all resources
             for (int iM=0; iM<par->num_m;iM++){
                 int idx = index::d2(t,iM,par->T,par->num_m);
 
-                double m = par->grid_m[iM];
-                sol->c[idx] = m;
-                sol->V[idx] = utils::util(sol->c[idx],par);
+                // double V_store[par->num_L];
+                // double c_store[par->num_L];
+                double V_store[2] = {0,0};
+                double c_store[2] = {0,0};
                 
+                for (int i_l = 0; i_l <par -> num_L; i_l++){
+                    
+                    if(i_l == 0){
+                      c_store[i_l] = par->grid_m[iM] * par->UE_benefit;
+                    } else {
+                       c_store[i_l] = par->grid_m[iM]; 
+                    }
+
+                    V_store[i_l] = utils::util(c_store[i_l], i_l,par);   
+                }
+               
+
+                if(V_store[0] > V_store[1]){
+                    sol->c[idx] = c_store[0];
+                    sol->V[idx] = V_store[0]; 
+                    sol->labor[idx] = 0;  
+                } else {
+                    sol->c[idx] = c_store[1];
+                    sol->V[idx] = V_store[1]; 
+                    sol->labor[idx] = 1;
+                }                
             }
 
         } else {
@@ -102,29 +131,49 @@ namespace solution {
                     int idx_next = index::d2(t+1,iM,par->T,par->num_m);
                     int idx_next_interp = index::d2(t+1,0,par->T,par->num_m);
                     
-                    // resources
-                    double m = par->grid_m[iM];
-                    
-                    // search over optimal total consumption, C
-                    solver_data->m = m;
-                    solver_data->V_next = &sol->V[idx_next_interp];
-                    solver_data->par = par;
-                    nlopt_set_min_objective(opt, objfunc_wrap, solver_data); 
+                    double V_store[2] = {0,0};
+                    double c_store[2] = {0,0};
 
-                    // bounds
-                    lb[0] = 1.0e-6;
-                    ub[0] = m-1.0e-6; // cannot borrow
-                    nlopt_set_lower_bounds(opt, lb);
-                    nlopt_set_upper_bounds(opt, ub);
+                    for (int i_l = 0; i_l <par -> num_L; i_l++){
+                        // resources
+                        double m = par->grid_m[iM];
+                        if(i_l == 0){
+                            double m = par->grid_m[iM] * par->UE_benefit;
+                        } 
+                        
+                        // search over optimal total consumption, C
+                        solver_data->labor = i_l;
+                        solver_data->m = m;
+                        solver_data->V_next = &sol->V[idx_next_interp];
+                        solver_data->par = par;
+                        nlopt_set_min_objective(opt, objfunc_wrap, solver_data); 
 
-                    // optimize
-                    x[0] = sol->c[idx_next]*0.98; // initial value is last period's consumption
-                    nlopt_optimize(opt, x, &minf); 
+                        // bounds
+                        lb[0] = 1.0e-6;
+                        ub[0] = m-1.0e-6; // cannot borrow
+                        nlopt_set_lower_bounds(opt, lb);
+                        nlopt_set_upper_bounds(opt, ub);
 
-                    // store results
-                    sol->c[idx] = x[0];
-                    sol->V[idx] = -minf;  // negative since we minimize   
-                    
+                        // optimize
+                        x[0] = sol->c[idx_next]*0.98; // initial value is last period's consumption
+                        nlopt_optimize(opt, x, &minf); 
+
+                        // store results
+                        c_store[i_l] = x[0];;
+                        V_store[i_l] = -minf;   // negative since we minimize  
+                    } // i_l
+
+                    if(V_store[0]> V_store[1]){
+                        sol->c[idx] = c_store[0];
+                        sol->V[idx] = V_store[0];   
+                        sol->labor[idx] = 0;
+                    } else {
+                        sol->c[idx] = c_store[1];
+                        sol->V[idx] = V_store[1]; 
+                        sol->labor[idx] = 1;
+                    }  
+
+                
                 } // iM
 
                 // 4. destroy optimizer
