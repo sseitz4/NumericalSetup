@@ -20,12 +20,20 @@ class ModelClass(EconModelClass):
         
         # Utility: 
         par.rho = 2.0   # CRRA
+        par.theta = 0.05 # Disutility from labor
         par.beta = 0.98 # Discount factor
 
         ###################
         # state variables #
         par.T = 15
         
+        # Time endowment
+        par.Time_end = 3
+
+        # Labor supply:
+        par.num_L = 1
+        par.UE_benefit = 0.43
+
         # wealth
         par.num_m = 100
         par.max_m = 20.0
@@ -58,6 +66,7 @@ class ModelClass(EconModelClass):
         shape_sol = (par.T,par.num_m)
         sol.V = np.nan + np.ones(shape_sol) 
         sol.c = np.nan + np.ones(shape_sol) 
+        sol.labor = np.nan + np.ones(shape_sol) 
         
         # c. memory for simulation
         shape_sim = (par.simN,par.T)
