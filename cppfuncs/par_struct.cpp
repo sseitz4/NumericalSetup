@@ -2,8 +2,12 @@ typedef struct par_struct
 {
  double R;
  double rho;
+ double theta;
  double beta;
  int T;
+ int Time_end;
+ int num_L;
+ double UE_benefit;
  int num_m;
  double max_m;
  double G;
@@ -26,7 +30,9 @@ double get_double_par_struct(par_struct* x, char* name){
 
  if( strcmp(name,"R") == 0 ){ return x->R; }
  else if( strcmp(name,"rho") == 0 ){ return x->rho; }
+ else if( strcmp(name,"theta") == 0 ){ return x->theta; }
  else if( strcmp(name,"beta") == 0 ){ return x->beta; }
+ else if( strcmp(name,"UE_benefit") == 0 ){ return x->UE_benefit; }
  else if( strcmp(name,"max_m") == 0 ){ return x->max_m; }
  else if( strcmp(name,"G") == 0 ){ return x->G; }
  else if( strcmp(name,"sigma_psi") == 0 ){ return x->sigma_psi; }
@@ -39,6 +45,8 @@ double get_double_par_struct(par_struct* x, char* name){
 int get_int_par_struct(par_struct* x, char* name){
 
  if( strcmp(name,"T") == 0 ){ return x->T; }
+ else if( strcmp(name,"Time_end") == 0 ){ return x->Time_end; }
+ else if( strcmp(name,"num_L") == 0 ){ return x->num_L; }
  else if( strcmp(name,"num_m") == 0 ){ return x->num_m; }
  else if( strcmp(name,"num_psi") == 0 ){ return x->num_psi; }
  else if( strcmp(name,"num_xi") == 0 ){ return x->num_xi; }
