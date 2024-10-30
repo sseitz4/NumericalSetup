@@ -1,6 +1,6 @@
 #ifndef MAIN
 #define SOLUTION
-#include "myheader.cpp"
+#include "myheader.h"
 #endif
 
 namespace solution {
