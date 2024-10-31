@@ -26,7 +26,7 @@ class ModelClass(EconModelClass):
         ###################
         # state variables #
         par.T = 15
-        par.num_kids = 2 # Number Children // Note: max_para must always be greater by one than the actual grid, so the Final Period = 14 ==> par.T = 15 [weird C++ thing]
+        par.max_kids = 2 # Number Children // Note: max_para must always be greater by one than the actual grid, so the Final Period = 14 ==> par.T = 15 [weird C++ thing]
 
         # wealth
         par.num_m = 100
@@ -59,7 +59,7 @@ class ModelClass(EconModelClass):
         self.setup_grids()
 
         # b. memory for solution
-        shape_sol = (par.T, par.num_kids,par.num_m)     # Need to update this whenever I change the model: Needs to have the form (States, Choices)
+        shape_sol = (par.T, par.max_kids,par.num_m)     # Need to update this whenever I change the model: Needs to have the form (States, Choices)
         sol.V = np.nan + np.ones(shape_sol)             # Given shape_sol, this automatically takes the form of an array with dimensions (States, Choices)
         sol.c = np.nan + np.ones(shape_sol) 
         
