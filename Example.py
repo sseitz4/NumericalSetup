@@ -21,11 +21,13 @@ class ModelClass(EconModelClass):
         # Utility: 
         par.rho = 2.0   # CRRA
         par.beta = 0.98 # Discount factor
+        
 
         ###################
         # state variables #
         par.T = 15
-        
+        par.num_kids = 2 # Number Children // Note: max_para must always be greater by one than the actual grid, so the Final Period = 14 ==> par.T = 15 [weird C++ thing]
+
         # wealth
         par.num_m = 100
         par.max_m = 20.0
@@ -35,6 +37,8 @@ class ModelClass(EconModelClass):
 
         par.sigma_psi = 0.1 # permanent income shock std
         par.sigma_xi = 0.1 # transitory income shock std
+
+        par.prob_arrival_kids = 0.025 # Probability of having a kid // Test with = 0.0 as you never get any kid...
 
         par.num_psi = 5
         par.num_xi = 5
@@ -55,8 +59,8 @@ class ModelClass(EconModelClass):
         self.setup_grids()
 
         # b. memory for solution
-        shape_sol = (par.T,par.num_m)
-        sol.V = np.nan + np.ones(shape_sol) 
+        shape_sol = (par.T, par.num_kids,par.num_m)     # Need to update this whenever I change the model: Needs to have the form (States, Choices)
+        sol.V = np.nan + np.ones(shape_sol)             # Given shape_sol, this automatically takes the form of an array with dimensions (States, Choices)
         sol.c = np.nan + np.ones(shape_sol) 
         
         # c. memory for simulation
@@ -69,6 +73,7 @@ class ModelClass(EconModelClass):
         sim.A = np.nan + np.zeros(shape_sim)
         sim.P = np.nan + np.zeros(shape_sim)
         sim.Y = np.nan + np.zeros(shape_sim)
+        sim.Kids = np.zeros(shape_sim, dtype = ('int')) # Gives you a float: np.nan + np.zeros(shape_sim, dtype = ('int')) # NEW
         
         # d. initialization, no assets and permanent income of 1
         sim.a_init = np.zeros(par.simN)
@@ -79,7 +84,10 @@ class ModelClass(EconModelClass):
         sim.xi = np.exp(par.sigma_xi*np.random.normal(size=shape_sim) - 0.5*par.sigma_xi**2)
         sim.psi = np.exp(par.sigma_psi*np.random.normal(size=shape_sim) - 0.5*par.sigma_psi**2)
 
-        
+        # f. initialization, no kids:
+        sim.kids_init = np.zeros(par.simN, dtype =('int'))  # NEW
+        sim.kids_update = np.random.uniform(low=0, high=1, size=shape_sim)
+
     def setup_grids(self):
         par = self.par
         
