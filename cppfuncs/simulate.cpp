@@ -41,10 +41,10 @@ namespace simulation {
 
                     if( sim->Kids[it] == 0) {
                         sim->c[it] = tools::interp_1d(par->grid_m,par->num_m,&sol->c_no[idx_interp],sim->m[it]);
-                        
+                        sim->g_K[it] = tools::interp_1d(par->grid_m,par->num_m,&sol->g_Kids[idx_interp],sim->m[it]);
                     } else {
                        sim->c[it] = tools::interp_1d(par->grid_m,par->num_m,&sol->c_w[idx_interp],sim->m[it]);
-                        
+                       sim->g_K[it] = 1;
                     }
                     
                     sim->V_no[it] = tools::interp_1d(par->grid_m,par->num_m,&sol->V_no[idx_interp],sim->m[it]);
@@ -66,6 +66,12 @@ namespace simulation {
                         } else {
                             sim->Kids[it1] = 0;
                         }
+                       /*if (sim -> g_K[it] > 0.5){
+                            sim->Kids[it1] = 1;
+                        } else {
+                            sim->Kids[it1] = 0;
+                        }*/
+
                         
                     }
 
