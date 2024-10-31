@@ -2,7 +2,7 @@
 // functions for solving model for singles.
 #ifndef MAIN
 #define SIMULATE
-#include "myheader.cpp"
+#include "myheader.h"
 #endif
 
 namespace simulation {
@@ -31,10 +31,13 @@ namespace simulation {
                         sim->M[it] = par->R*sim->A[it] + sim->Y[it];
                         sim->m[it] = sim->M[it]/sim->P[it];
                         
+                        // Kids:
+                        sim->Kids[it] = sim->kids_init[i];
                     } 
 
                     // b. interpolate optimal consumption (normalized)
-                    int idx_interp = index::d2(t,0,par->T,par->num_m);
+                    // |C:| I think here is an error... Something in the interpolation goes wrong
+                    int idx_interp = index::d3(t, sim->Kids[it],0,par->T, par-> num_kids, par->num_m);
                     sim->c[it] = tools::interp_1d(par->grid_m,par->num_m,&sol->c[idx_interp],sim->m[it]);
 
                     // c. Update next-period states
@@ -47,6 +50,17 @@ namespace simulation {
 
                         sim->M[it1] = par->R*sim->A[it1] + sim->Y[it1];
                         sim->m[it1] = sim->M[it1]/sim->P[it1];
+
+                        if (sim -> Kids[it] == 1){
+                            sim->Kids[it1] = 1;
+                        } else {
+                            if( sim->kids_update[it] <= par->prob_arrival_kids){
+                            sim->Kids[it1] = 1;
+                            } else {
+                            sim->Kids[it1] = 0;
+                            }
+                        }
+                        
                     }
 
                 } // t
