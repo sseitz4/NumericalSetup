@@ -22,42 +22,25 @@ namespace solution {
             savings = 1.0e-6; // no savings
         }
         
-        // Outer expectation: number of kids:
-        double EV_outer_next[2] = {0.0, 0.0};
-        for (int i_kids_next = 0; i_kids_next < par->max_kids; i_kids_next++) {
-            // expected continuation value (inner expectation = income)
-            double EV_next = 0.0;
-            for (int i_shock=0; i_shock<par->num_shocks; i_shock++){
-                
-                double fac = par->G*par->grid_psi[i_shock]; // normalization factor
-
-                // interpolate next period value function for this combination of transitory and permanent income shocks
-                double m_next = par->R*savings/fac + par->grid_xi[i_shock];
-                int idx_next_interp = index::d2(i_kids_next, 0, par->max_kids,par->num_m); 
-                double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,&V_next[idx_next_interp],m_next); // The "&" is needed as a "pointer" from the double to an integer in the memory [V_next is a double array, but we only want to know the element/index corresponding to this function value]
-                V_next_interp = pow(fac , (1.0-par->rho)) * V_next_interp; // normalization factor
-
-                // add to expectation
-                double prob = par->psi_w[i_shock]*par->xi_w[i_shock];
-                EV_next += prob*V_next_interp;
-                
-            }
+        // expected continuation value (inner expectation = income)
+        double EV_next = 0.0;
+        for (int i_shock=0; i_shock<par->num_shocks; i_shock++){
             
-            EV_outer_next[i_kids_next] = EV_next;   // |NOTE:| In C++ Arrays are defined by array[dimension 1][dimension 2]. However it starts counting at 0, so an array example[2] is a 
-                                                    // vector with two elements. The corresponding index are 0,1...
-        }
+            double fac = par->G*par->grid_psi[i_shock]; // normalization factor
 
-        double EV_next_final = 0.0;
-        if (kids_state == 0){
-                double prob_kids = par-> prob_arrival_kids;  // If you have 0 kids today, you will get one kid with prob = prob_arrival_kids next period
-                EV_next_final = EV_outer_next[0] * (1.0 - prob_kids)  + EV_outer_next[1] * prob_kids;
-            } else {
-                double prob_kids = 1.0;  // If you have a kid, you will have this kid forever.
-                EV_next_final = EV_outer_next[0] * (1.0 - prob_kids)  + EV_outer_next[1] * prob_kids;
-            }
-         
+            // interpolate next period value function for this combination of transitory and permanent income shocks
+            double m_next = par->R*savings/fac + par->grid_xi[i_shock];
+            double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,V_next,m_next); // The "&" is needed as a "pointer" from the double to an integer in the memory [V_next is a double array, but we only want to know the element/index corresponding to this function value]
+            V_next_interp = pow(fac , (1.0-par->rho)) * V_next_interp; // normalization factor
+
+            // add to expectation
+            double prob = par->psi_w[i_shock]*par->xi_w[i_shock];
+            EV_next += prob*V_next_interp;
+            
+        }
+   
         // return discounted sum
-        return Util + par->beta * EV_next_final + penalty;
+        return Util + par->beta * EV_next + penalty;
     }
 
     typedef struct {
@@ -88,17 +71,31 @@ namespace solution {
     void solve_period(int t,sol_struct *sol,par_struct *par){
         
         if (t == (par->T-1)){
-            for (int i_kids = 0; i_kids < par-> max_kids; i_kids++){
+            
             // terminal period: consume all resources
-                for (int iM=0; iM<par->num_m;iM++){
-                    int idx = index::d3(t, i_kids, iM,par->T,par-> max_kids, par->num_m);
+            for (int iM=0; iM<par->num_m;iM++){
+                int idx = index::d2(t, iM,par->T, par->num_m);
+                double m = par->grid_m[iM];
 
-                    double m = par->grid_m[iM];
-                    sol->c[idx] = m;
-                    sol->V[idx] = utils::util(sol->c[idx], i_kids,par);
+                for (int i_kids = 0; i_kids < par-> max_kids; i_kids++){
                     
+                    if(i_kids == 0){
+                        sol->c_no[idx] = m;
+                        sol->V_no[idx] = utils::util(sol->c_no[idx], i_kids,par);
+                    } else {
+                        sol->c_w[idx] = m;
+                        sol->V_w[idx] = utils::util(sol->c_w[idx], i_kids,par);
+                    }                    
+                }
+                if (sol->V_w[idx] > sol-> V_no[idx]){
+                    sol->g_Kids[idx] = 1;
+                    sol->V_int[idx] = sol->V_w[idx];
+                } else {
+                    sol->g_Kids[idx] = 0;
+                    sol->V_int[idx] = sol->V_no[idx];
                 }
             }
+            
         } else {
 
             // setup parallel region. after this, each thread will have its own copy of the solver_data object.
@@ -117,35 +114,66 @@ namespace solution {
                 // 2. loop over resources (in parallel)
                 #pragma omp for
                 for (int iM=0; iM<par->num_m;iM++){
-                    for (int i_kids = 0; i_kids < par->max_kids; i_kids++){                
-                        int idx = index::d3(t, i_kids, iM, par->T, par->max_kids, par->num_m);
-                        int idx_next = index::d3(t+1, i_kids, iM, par->T, par-> max_kids, par->num_m);
-                        int idx_next_interp = index::d3(t+1,0, 0,par->T, par->max_kids,par->num_m);       // |Q:| Why start from iM=0?
+                    int idx = index::d2(t, iM, par->T, par->num_m);
+                    int idx_next = index::d2(t+1, iM, par->T, par->num_m);
+                    int idx_next_interp = index::d2(t+1, 0,par->T,par->num_m);       // |Q:| Why start from iM=0?
                         
                         // resources
-                        double m = par->grid_m[iM];
+                    double m = par->grid_m[iM];
+
+                    for (int i_kids = 0; i_kids < par->max_kids; i_kids++){                
                         
-                        // search over optimal total consumption, C
-                        solver_data->m = m;
-                        solver_data-> kids_state = i_kids;
-                        solver_data->V_next = &sol->V[idx_next_interp];
-                        solver_data->par = par;
-                        nlopt_set_min_objective(opt, objfunc_wrap, solver_data); 
+                        if(i_kids == 0){
+                            // search over optimal total consumption, C
+                            solver_data->m = m;
+                            solver_data-> kids_state = i_kids;
+                            solver_data->V_next = &sol->V_int[idx_next_interp];      // Here I have to make a change to account for # kids might change if #_kids = 0 today
+                            solver_data->par = par;
+                            nlopt_set_min_objective(opt, objfunc_wrap, solver_data); 
 
-                        // bounds
-                        lb[0] = 1.0e-6;
-                        ub[0] = m-1.0e-6; // cannot borrow
-                        nlopt_set_lower_bounds(opt, lb);
-                        nlopt_set_upper_bounds(opt, ub);
+                            // bounds
+                            lb[0] = 1.0e-6;
+                            ub[0] = m-1.0e-6; // cannot borrow
+                            nlopt_set_lower_bounds(opt, lb);
+                            nlopt_set_upper_bounds(opt, ub);
 
-                        // optimize
-                        x[0] = sol->c[idx_next]*0.98; // initial value is last period's consumption
-                        nlopt_optimize(opt, x, &minf); 
+                            // optimize
+                            x[0] = sol->c_no[idx_next]*0.98; // initial value is last period's consumption
+                            nlopt_optimize(opt, x, &minf); 
 
-                        // store results
-                        sol->c[idx] = x[0];
-                        sol->V[idx] = -minf;  // negative since we minimize   
-                        
+                            // store results
+                            sol->c_no[idx] = x[0];
+                            sol->V_no[idx] = -minf;  // negative since we minimize   
+                        } else {
+                            // search over optimal total consumption, C
+                            solver_data->m = m;
+                            solver_data-> kids_state = i_kids;
+                            solver_data->V_next = &sol->V_w[idx_next_interp];
+                            solver_data->par = par;
+                            nlopt_set_min_objective(opt, objfunc_wrap, solver_data); 
+
+                            // bounds
+                            lb[0] = 1.0e-6;
+                            ub[0] = m-1.0e-6; // cannot borrow
+                            nlopt_set_lower_bounds(opt, lb);
+                            nlopt_set_upper_bounds(opt, ub);
+
+                            // optimize
+                            x[0] = sol->c_w[idx_next]*0.98; // initial value is last period's consumption
+                            nlopt_optimize(opt, x, &minf); 
+
+                            // store results
+                            sol->c_w[idx] = x[0];
+                            sol->V_w[idx] = -minf;  // negative since we minimize   
+                        }
+
+                        if (sol->V_w[idx] > sol-> V_no[idx]){
+                            sol->g_Kids[idx] = 1;
+                            sol->V_int[idx] = sol->V_w[idx];
+                        } else {
+                            sol->g_Kids[idx] = 0;
+                            sol->V_int[idx] = sol->V_no[idx];
+                        }
                     } // iM
                 }
                 // 4. destroy optimizer
