@@ -37,7 +37,7 @@ namespace simulation {
 
                     // b. interpolate optimal consumption (normalized)
                     // |C:| I think here is an error... Something in the interpolation goes wrong
-                    int idx_interp = index::d3(t, sim->Kids[it],0,par->T, par-> num_kids, par->num_m);
+                    int idx_interp = index::d3(t, sim->Kids[it],0,par->T, par-> max_kids, par->num_m);
                     sim->c[it] = tools::interp_1d(par->grid_m,par->num_m,&sol->c[idx_interp],sim->m[it]);
 
                     // c. Update next-period states
