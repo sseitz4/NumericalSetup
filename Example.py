@@ -21,6 +21,7 @@ class ModelClass(EconModelClass):
         # Utility: 
         par.rho = 2.0   # CRRA
         par.beta = 0.98 # Discount factor
+        par.util_kids = 1.15 # Extra Utility kids give you
         
 
         ###################
