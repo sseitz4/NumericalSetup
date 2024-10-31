@@ -11,7 +11,6 @@ typedef struct par_struct
  double G;
  double sigma_psi;
  double sigma_xi;
- double prob_arrival_kids;
  int num_psi;
  int num_xi;
  int simN;
@@ -35,7 +34,6 @@ double get_double_par_struct(par_struct* x, char* name){
  else if( strcmp(name,"G") == 0 ){ return x->G; }
  else if( strcmp(name,"sigma_psi") == 0 ){ return x->sigma_psi; }
  else if( strcmp(name,"sigma_xi") == 0 ){ return x->sigma_xi; }
- else if( strcmp(name,"prob_arrival_kids") == 0 ){ return x->prob_arrival_kids; }
  else {return NAN;}
 
 }
