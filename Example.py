@@ -21,7 +21,7 @@ class ModelClass(EconModelClass):
         # Utility: 
         par.rho = 2.0   # CRRA
         par.beta = 0.98 # Discount factor
-        par.util_kids = 0.5 # Extra Utility kids give you
+        par.util_kids = 0.275 # Extra Utility kids give you -> = 0.5 : Everyone has kids as soon as they can; = 0.275 people get kids around t = 7; = 0.0 Nobody wants kids.
         
 
         ###################
@@ -65,7 +65,7 @@ class ModelClass(EconModelClass):
         sol.V_w = np.nan + np.ones(shape_sol)             # Given shape_sol, this automatically takes the form of an array with dimensions (States, Choices)
         sol.c_w = np.nan + np.ones(shape_sol) 
         sol.V_int = np.nan + np.ones(shape_sol)     # Additional function to account for individual's choice to have kids
-        sol.g_Kids = np.zeros(shape_sol, dtype = ('int'))
+        sol.g_Kids = np.zeros(shape_sol)
 
         # c. memory for simulation
         shape_sim = (par.simN,par.T)
@@ -80,7 +80,8 @@ class ModelClass(EconModelClass):
         sim.V_no = np.nan + np.zeros(shape_sim)
         sim.V_w = np.nan + np.zeros(shape_sim)
         sim.Kids = np.zeros(shape_sim, dtype = ('int')) # Gives you a float: np.nan + np.zeros(shape_sim, dtype = ('int')) # NEW
-        
+        sim.g_K = np.nan + np.zeros(shape_sim)  # Sebastian just testing something
+
         # d. initialization, no assets and permanent income of 1
         sim.a_init = np.zeros(par.simN)
         sim.P_init = np.ones(par.simN)
