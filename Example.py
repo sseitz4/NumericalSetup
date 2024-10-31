@@ -38,7 +38,7 @@ class ModelClass(EconModelClass):
         par.sigma_psi = 0.1 # permanent income shock std
         par.sigma_xi = 0.1 # transitory income shock std
 
-        par.prob_arrival_kids = 0.025 # Probability of having a kid // Test with = 0.0 as you never get any kid...
+        par.prob_arrival_kids = 1.00 # Probability of having a kid // Test with = 0.0 as you never get any kid...
 
         par.num_psi = 5
         par.num_xi = 5
