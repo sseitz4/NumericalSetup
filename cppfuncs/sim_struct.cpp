@@ -11,6 +11,7 @@ typedef struct sim_struct
  double* V_no;
  double* V_w;
  int* Kids;
+ double* g_K;
  double* a_init;
  double* P_init;
  double* xi;
@@ -31,6 +32,7 @@ double* get_double_p_sim_struct(sim_struct* x, char* name){
  else if( strcmp(name,"Y") == 0 ){ return x->Y; }
  else if( strcmp(name,"V_no") == 0 ){ return x->V_no; }
  else if( strcmp(name,"V_w") == 0 ){ return x->V_w; }
+ else if( strcmp(name,"g_K") == 0 ){ return x->g_K; }
  else if( strcmp(name,"a_init") == 0 ){ return x->a_init; }
  else if( strcmp(name,"P_init") == 0 ){ return x->P_init; }
  else if( strcmp(name,"xi") == 0 ){ return x->xi; }
