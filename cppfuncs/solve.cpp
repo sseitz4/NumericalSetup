@@ -33,8 +33,8 @@ namespace solution {
 
                 // interpolate next period value function for this combination of transitory and permanent income shocks
                 double m_next = par->R*savings/fac + par->grid_xi[i_shock];
-                int idx_next_interp = index::d2(i_kids_next, 0, par->num_kids,par->num_m);
-                double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,&V_next[idx_next_interp],m_next);
+                int idx_next_interp = index::d2(i_kids_next, 0, par->num_kids,par->num_m); 
+                double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,&V_next[idx_next_interp],m_next); // The "&" is needed as a "pointer" from the double to an integer in the memory [V_next is a double array, but we only want to know the element/index corresponding to this function value]
                 V_next_interp = pow(fac , (1.0-par->rho)) * V_next_interp; // normalization factor
 
                 // add to expectation
