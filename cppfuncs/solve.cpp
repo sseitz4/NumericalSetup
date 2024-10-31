@@ -24,7 +24,7 @@ namespace solution {
         
         // Outer expectation: number of kids:
         double EV_outer_next[2] = {0.0, 0.0};
-        for (int i_kids_next = 0; i_kids_next < par->num_kids; i_kids_next++) {
+        for (int i_kids_next = 0; i_kids_next < par->max_kids; i_kids_next++) {
             // expected continuation value (inner expectation = income)
             double EV_next = 0.0;
             for (int i_shock=0; i_shock<par->num_shocks; i_shock++){
@@ -33,7 +33,7 @@ namespace solution {
 
                 // interpolate next period value function for this combination of transitory and permanent income shocks
                 double m_next = par->R*savings/fac + par->grid_xi[i_shock];
-                int idx_next_interp = index::d2(i_kids_next, 0, par->num_kids,par->num_m); 
+                int idx_next_interp = index::d2(i_kids_next, 0, par->max_kids,par->num_m); 
                 double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,&V_next[idx_next_interp],m_next); // The "&" is needed as a "pointer" from the double to an integer in the memory [V_next is a double array, but we only want to know the element/index corresponding to this function value]
                 V_next_interp = pow(fac , (1.0-par->rho)) * V_next_interp; // normalization factor
 
@@ -88,10 +88,10 @@ namespace solution {
     void solve_period(int t,sol_struct *sol,par_struct *par){
         
         if (t == (par->T-1)){
-            for (int i_kids = 0; i_kids < par-> num_kids; i_kids++){
+            for (int i_kids = 0; i_kids < par-> max_kids; i_kids++){
             // terminal period: consume all resources
                 for (int iM=0; iM<par->num_m;iM++){
-                    int idx = index::d3(t, i_kids, iM,par->T,par-> num_kids, par->num_m);
+                    int idx = index::d3(t, i_kids, iM,par->T,par-> max_kids, par->num_m);
 
                     double m = par->grid_m[iM];
                     sol->c[idx] = m;
@@ -117,10 +117,10 @@ namespace solution {
                 // 2. loop over resources (in parallel)
                 #pragma omp for
                 for (int iM=0; iM<par->num_m;iM++){
-                    for (int i_kids = 0; i_kids < par->num_kids; i_kids++){                
-                        int idx = index::d3(t, i_kids, iM, par->T, par->num_kids, par->num_m);
-                        int idx_next = index::d3(t+1, i_kids, iM, par->T, par-> num_kids, par->num_m);
-                        int idx_next_interp = index::d3(t+1,0, 0,par->T, par->num_kids,par->num_m);       // |Q:| Why start from iM=0?
+                    for (int i_kids = 0; i_kids < par->max_kids; i_kids++){                
+                        int idx = index::d3(t, i_kids, iM, par->T, par->max_kids, par->num_m);
+                        int idx_next = index::d3(t+1, i_kids, iM, par->T, par-> max_kids, par->num_m);
+                        int idx_next_interp = index::d3(t+1,0, 0,par->T, par->max_kids,par->num_m);       // |Q:| Why start from iM=0?
                         
                         // resources
                         double m = par->grid_m[iM];
