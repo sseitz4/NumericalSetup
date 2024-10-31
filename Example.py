@@ -21,7 +21,7 @@ class ModelClass(EconModelClass):
         # Utility: 
         par.rho = 2.0   # CRRA
         par.beta = 0.98 # Discount factor
-        par.util_kids = 1.15 # Extra Utility kids give you
+        par.util_kids = 0.5 # Extra Utility kids give you
         
 
         ###################
@@ -39,8 +39,7 @@ class ModelClass(EconModelClass):
         par.sigma_psi = 0.1 # permanent income shock std
         par.sigma_xi = 0.1 # transitory income shock std
 
-        par.prob_arrival_kids = 0.025 # Probability of having a kid // Test with = 0.0 as you never get any kid...
-
+        
         par.num_psi = 5
         par.num_xi = 5
 
@@ -60,10 +59,14 @@ class ModelClass(EconModelClass):
         self.setup_grids()
 
         # b. memory for solution
-        shape_sol = (par.T, par.max_kids,par.num_m)     # Need to update this whenever I change the model: Needs to have the form (States, Choices)
-        sol.V = np.nan + np.ones(shape_sol)             # Given shape_sol, this automatically takes the form of an array with dimensions (States, Choices)
-        sol.c = np.nan + np.ones(shape_sol) 
-        
+        shape_sol = (par.T,par.num_m)     # Need to update this whenever I change the model: Needs to have the form (States, Choices)
+        sol.V_no = np.nan + np.ones(shape_sol)             # Given shape_sol, this automatically takes the form of an array with dimensions (States, Choices)
+        sol.c_no = np.nan + np.ones(shape_sol) 
+        sol.V_w = np.nan + np.ones(shape_sol)             # Given shape_sol, this automatically takes the form of an array with dimensions (States, Choices)
+        sol.c_w = np.nan + np.ones(shape_sol) 
+        sol.V_int = np.nan + np.ones(shape_sol)     # Additional function to account for individual's choice to have kids
+        sol.g_Kids = np.zeros(shape_sol, dtype = ('int'))
+
         # c. memory for simulation
         shape_sim = (par.simN,par.T)
         sim.c = np.nan + np.zeros(shape_sim)
@@ -74,6 +77,8 @@ class ModelClass(EconModelClass):
         sim.A = np.nan + np.zeros(shape_sim)
         sim.P = np.nan + np.zeros(shape_sim)
         sim.Y = np.nan + np.zeros(shape_sim)
+        sim.V_no = np.nan + np.zeros(shape_sim)
+        sim.V_w = np.nan + np.zeros(shape_sim)
         sim.Kids = np.zeros(shape_sim, dtype = ('int')) # Gives you a float: np.nan + np.zeros(shape_sim, dtype = ('int')) # NEW
         
         # d. initialization, no assets and permanent income of 1
