@@ -33,7 +33,8 @@ namespace solution {
 
                 // interpolate next period value function for this combination of transitory and permanent income shocks
                 double m_next = par->R*savings/fac + par->grid_xi[i_shock];
-                double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,V_next,m_next);
+                int idx_next_interp = index::d2(i_kids_next, 0, par->num_kids,par->num_m);
+                double V_next_interp = tools::interp_1d(par->grid_m,par->num_m,&V_next[idx_next_interp],m_next);
                 V_next_interp = pow(fac , (1.0-par->rho)) * V_next_interp; // normalization factor
 
                 // add to expectation
@@ -115,8 +116,8 @@ namespace solution {
 
                 // 2. loop over resources (in parallel)
                 #pragma omp for
-                for (int i_kids = 0; i_kids < par->num_kids; i_kids++){
-                    for (int iM=0; iM<par->num_m;iM++){
+                for (int iM=0; iM<par->num_m;iM++){
+                    for (int i_kids = 0; i_kids < par->num_kids; i_kids++){                
                         int idx = index::d3(t, i_kids, iM, par->T, par->num_kids, par->num_m);
                         int idx_next = index::d3(t+1, i_kids, iM, par->T, par-> num_kids, par->num_m);
                         int idx_next_interp = index::d3(t+1,0, 0,par->T, par->num_kids,par->num_m);       // |Q:| Why start from iM=0?
